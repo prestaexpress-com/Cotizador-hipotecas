@@ -8,6 +8,16 @@
   let modoEdicion = false;
   let tokenActivo = null;
   let datosOriginales = null;
+  let correlativoActual = null;
+
+  function formatearCorrelativo(numero) {
+    if (numero === null || numero === undefined) return '';
+    return 'CCQ-' + String(numero).padStart(4, '0');
+  }
+
+  window.obtenerCorrelativoActual = function () {
+    return correlativoActual ? formatearCorrelativo(correlativoActual) : '';
+  };
 
   function recolectarDatos() {
     const hipotecas = [];
@@ -158,8 +168,9 @@
       const resultado = await SC.supabaseFetch('cotizaciones', 'POST', datos);
       const registro = Array.isArray(resultado) ? resultado[0] : resultado;
       const token = registro.edit_token;
+      correlativoActual = registro.numero;
       localStorage.setItem('ultimo_token', token);
-      mostrarModalToken(token, datos.cliente);
+      mostrarModalToken(token, datos.cliente, correlativoActual);
     } catch (err) {
       console.error(err);
       mostrarToast('❌ Error al guardar: ' + err.message, 'error');
@@ -193,6 +204,7 @@
       const cotizacion = data[0];
       datosOriginales = { ...cotizacion };
       tokenActivo = token;
+      correlativoActual = cotizacion.numero;
       llenarFormulario(cotizacion);
       activarModoEdicion(cotizacion.cliente);
       mostrarToast(`✅ Cotización de ${cotizacion.cliente} cargada`, 'success');
@@ -388,6 +400,7 @@
     modoEdicion = false;
     tokenActivo = null;
     datosOriginales = null;
+    correlativoActual = null;
     const banner = document.getElementById('sb-edicion-banner');
     if (banner) banner.style.display = 'none';
     const btnGuardar = document.getElementById('btn-guardar-supabase');
@@ -398,9 +411,10 @@
     }
   }
 
-  function mostrarModalToken(token, cliente) {
+  function mostrarModalToken(token, cliente, numero) {
     const tokenEsc = SC.escapeHtml(token);
     const clienteEsc = SC.escapeHtml(cliente);
+    const correlativoEsc = SC.escapeHtml(formatearCorrelativo(numero));
     const enlace = `${window.location.origin}/ver-cotizacion.html?token=${encodeURIComponent(token)}`;
     const enlaceEsc = SC.escapeHtml(enlace);
 
@@ -413,6 +427,7 @@
             <div class="sb-check-icon">✓</div>
             <h2>¡Cotización guardada!</h2>
             <p>Para <strong>${clienteEsc}</strong></p>
+            ${correlativoEsc ? `<p style="margin-top:6px;font-size:12px;opacity:0.75;font-family:monospace;letter-spacing:0.5px">Ref. ${correlativoEsc}</p>` : ''}
           </div>
           <div class="sb-modal-body">
             <p class="sb-label">Token de acceso del cliente</p>
