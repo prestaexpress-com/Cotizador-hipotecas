@@ -1250,6 +1250,7 @@
               <table id="tabla-cotizaciones">
                 <thead>
                   <tr>
+                    <th onclick="sortBy('numero')" style="width:90px">Ref. <i class="fas fa-sort"></i></th>
                     <th onclick="sortBy('created_at')">Fecha <i class="fas fa-sort"></i></th>
                     <th onclick="sortBy('cliente')">Cliente <i class="fas fa-sort"></i></th>
                     <th onclick="sortBy('empresa')">Empresa <i class="fas fa-sort"></i></th>
@@ -1263,7 +1264,7 @@
                 </thead>
                 <tbody id="tabla-body">
                   <tr>
-                    <td colspan="8">
+                    <td colspan="10">
                       <div class="empty-state"><i class="fas fa-circle-notch fa-spin"></i>
                         <p>Cargando...</p>
                       </div>
@@ -1501,11 +1502,16 @@
         const mes = document.getElementById('filter-mes').value;
 
         cotizacionesFiltradas = todasCotizaciones.filter(c => {
+          const correlativoTxt = c.numero !== null && c.numero !== undefined
+            ? ('ccq-' + String(c.numero).padStart(4, '0'))
+            : '';
           const matchQ = !q ||
             (c.cliente || '').toLowerCase().includes(q) ||
             (c.dpi || '').toLowerCase().includes(q) ||
             (c.asesor || '').toLowerCase().includes(q) ||
-            (c.nit || '').toLowerCase().includes(q);
+            (c.nit || '').toLowerCase().includes(q) ||
+            correlativoTxt.includes(q.toLowerCase()) ||
+            String(c.numero || '').includes(q);
           const matchEmpresa = !empresa || c.empresa === empresa;
           const matchMes = !mes || new Date(c.created_at).toISOString().slice(0, 7) === mes;
           return matchQ && matchEmpresa && matchMes;
@@ -1534,6 +1540,11 @@
         filtrarTabla();
       }
 
+      function fmtCorrelativo(numero) {
+        if (numero === null || numero === undefined) return '—';
+        return 'CCQ-' + String(numero).padStart(4, '0');
+      }
+
       function renderTabla(data) {
         const tbody = document.getElementById('tabla-body');
         const total = data.length;
@@ -1542,7 +1553,7 @@
         const pagina = data.slice(inicio, fin);
 
         if (pagina.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">
+          tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
               <i class="fas fa-inbox"></i>
               <p>No hay cotizaciones que coincidan con los filtros</p>
             </div></td></tr>`;
@@ -1557,6 +1568,7 @@
             const tipoPrestamo = SC.escapeHtml(c.tipo_prestamo || '');
             const monedaTxt = SC.escapeHtml(c.moneda || 'GTQ');
             const id = SC.escapeAttr(c.id);
+            const correlativo = SC.escapeHtml(fmtCorrelativo(c.numero));
             const estadoBadge = c.fue_editado
               ? `<span class="badge" style="background:rgba(245,158,11,0.15);color:#F59E0B;border:1px solid rgba(245,158,11,0.3)" title="Editado el ${editadoAt}">
                   <i class="fas fa-pencil-alt" style="font-size:9px;margin-right:3px"></i>Editado ${editadoAt}
@@ -1564,6 +1576,7 @@
               : `<span class="badge badge-green" style="font-size:10px">Original</span>`;
             return `
               <tr>
+                <td><span style="font-family:monospace;font-size:11px;color:var(--text-2);letter-spacing:0.5px">${correlativo}</span></td>
                 <td class="date-cell">${fecha}</td>
                 <td class="strong">${cliente}</td>
                 <td>${empresa ? `<span class="badge badge-orange">${empresa}</span>` : '—'}</td>
@@ -1642,7 +1655,8 @@
         const fecha = SC.fmtFecha(c.created_at, { day: '2-digit', month: 'long', year: 'numeric' });
 
         document.getElementById('modal-detalle-title').textContent = c.cliente || 'Sin nombre';
-        document.getElementById('modal-detalle-sub').textContent = `Creado el ${fecha}`;
+        const correlativoTxt = fmtCorrelativo(c.numero);
+        document.getElementById('modal-detalle-sub').textContent = `${correlativoTxt} · Creado el ${fecha}`;
 
         const resumen = c.resumen_financiero || {};
         const esc = SC.escapeHtml;
@@ -1791,11 +1805,11 @@
         const data = cotizacionesFiltradas.length > 0 ? cotizacionesFiltradas : todasCotizaciones;
         if (!data.length) { toast('No hay datos para exportar', 'warning'); return; }
 
-        const cols = ['created_at', 'cliente', 'dpi', 'nit', 'empresa', 'asesor', 'tipo_solicitud',
+        const cols = ['numero', 'created_at', 'cliente', 'dpi', 'nit', 'empresa', 'asesor', 'tipo_solicitud',
           'moneda', 'tipo_prestamo', 'capital', 'interes', 'corretaje', 'gastos_admin', 'legal',
           'meses_adelantar', 'cantidad_fincas', 'tipo_impuesto', 'valor_rgp', 'valor_catastro', 'fecha_desembolso'];
 
-        const headers = ['Fecha', 'Cliente', 'DPI', 'NIT', 'Empresa', 'Asesor', 'Tipo Solicitud',
+        const headers = ['Ref.', 'Fecha', 'Cliente', 'DPI', 'NIT', 'Empresa', 'Asesor', 'Tipo Solicitud',
           'Moneda', 'Tipo Préstamo', 'Capital', '% Interés', '% Corretaje', '% Gastos Admin', '% Legal',
           'Meses Adelantados', 'Cantidad Fincas', 'Tipo Impuesto', 'Valor RGP', 'Valor Catastro', 'Fecha Desembolso'];
 
@@ -1808,6 +1822,7 @@
         const rows = data.map(c =>
           cols.map(col => {
             let v = c[col] ?? '';
+            if (col === 'numero') v = fmtCorrelativo(v);
             if (col === 'created_at' && v) v = new Date(v).toLocaleDateString('es-GT');
             return escapeCSV(v);
           }).join(',')
@@ -1823,11 +1838,11 @@
         const data = cotizacionesFiltradas.length > 0 ? cotizacionesFiltradas : todasCotizaciones;
         if (!data.length) { toast('No hay datos para exportar', 'warning'); return; }
 
-        const cols = ['created_at', 'cliente', 'dpi', 'nit', 'empresa', 'asesor', 'tipo_solicitud',
+        const cols = ['numero', 'created_at', 'cliente', 'dpi', 'nit', 'empresa', 'asesor', 'tipo_solicitud',
           'moneda', 'tipo_prestamo', 'capital', 'interes', 'corretaje', 'gastos_admin', 'legal',
           'meses_adelantar', 'cantidad_fincas', 'tipo_impuesto', 'valor_rgp', 'valor_catastro', 'fecha_desembolso'];
 
-        const headers = ['Fecha', 'Cliente', 'DPI', 'NIT', 'Empresa', 'Asesor', 'Tipo Solicitud',
+        const headers = ['Ref.', 'Fecha', 'Cliente', 'DPI', 'NIT', 'Empresa', 'Asesor', 'Tipo Solicitud',
           'Moneda', 'Tipo Préstamo', 'Capital', '% Interés', '% Corretaje', '% Gastos Admin', '% Legal',
           'Meses Adelantados', 'Cantidad Fincas', 'Tipo Impuesto', 'Valor RGP', 'Valor Catastro', 'Fecha Desembolso'];
 
@@ -1835,6 +1850,7 @@
         const rows = data.map(c =>
           cols.map(col => {
             let v = c[col] ?? '';
+            if (col === 'numero') v = fmtCorrelativo(v);
             if (col === 'created_at' && v) v = new Date(v).toLocaleDateString('es-GT');
             return v;
           })
