@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Cotización de Hipoteca</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B00;
+            --primary-dark: #E05600;
+            --primary-light: #FFF0E6;
+            --success: #00B884;
+            --danger: #FF5252;
+            --warning: #FFB800;
+            --text: #1A1A2E;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --bg: #F9FAFB;
+            --card: #FFFFFF;
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 16px rgba(255, 107, 0, 0.3);
+        }
+
+        .header-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            width: 42px;
+            height: 42px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .badge-token {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-family: 'DM Mono', monospace;
+            font-size: 11px;
+            opacity: 0.9;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ── Container ── */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* ── States ── */
+        .state-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .state-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .state-desc {
+            color: var(--text-light);
+            font-size: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Spinner */
+        .spinner-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 80px 0;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Alert banner ── */
+        .alert {
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-info {
+            background: #EFF6FF;
+            border: 1px solid #BFDBFE;
+            color: #1D4ED8;
+        }
+
+        .alert-success {
+            background: #ECFDF5;
+            border: 1px solid #A7F3D0;
+            color: #065F46;
+        }
+
+        .alert-warning {
+            background: #FFFBEB;
+            border: 1px solid #FDE68A;
+            color: #92400E;
+        }
+
+        /* ── Info general ── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .info-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-card-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .info-card-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .info-card-value.highlight {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        /* ── Section ── */
+        .section {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #FAFAFA;
+        }
+
+        .section-header i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .section-header h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .section-body {
+            padding: 24px;
+        }
+
+        /* ── Form fields ── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-group.span-2 {
+            grid-column: span 2;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .field-input {
+            padding: 10px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text);
+            background: white;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.12);
+        }
+
+        .field-input:read-only {
+            background: #F9FAFB;
+            color: var(--text-light);
+            cursor: default;
+        }
+
+        .field-input.editable {
+            border-color: #BFDBFE;
+            background: #EFF6FF;
+        }
+
+        .field-input.editable:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        }
+
+        /* ── Desglose table ── */
+        .desglose-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .desglose-table tr {
+            border-bottom: 1px solid var(--border);
+        }
+
+        .desglose-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .desglose-table td {
+            padding: 10px 0;
+        }
+
+        .desglose-table .label {
+            color: var(--text-light);
+            padding-left: 12px;
+        }
+
+        .desglose-table .indent {
+            color: var(--text-light);
+            padding-left: 28px;
+            font-size: 13px;
+        }
+
+        .desglose-table .amount {
+            text-align: right;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .desglose-table .amount.negative {
+            color: var(--danger);
+        }
+
+        .desglose-table .amount.positive {
+            color: var(--success);
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .desglose-table .subtotal-row {
+            background: #FAFAFA;
+            font-weight: 600;
+        }
+
+        .desglose-table .subtotal-row td {
+            padding: 12px 0;
+        }
+
+        .desglose-table .total-row {
+            background: var(--primary-light);
+        }
+
+        .desglose-table .total-row td {
+            padding: 14px 0;
+            font-weight: 700;
+        }
+
+        /* ── Desembolsos table ── */
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .desembolsos-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .desembolsos-table th {
+            background: var(--primary);
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .desembolsos-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .desembolsos-table tr:nth-child(even) td {
+            background: #FAFAFA;
+        }
+
+        /* ── Botón guardar ── */
+        .save-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid var(--border);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .save-bar-info {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        .save-bar-info strong {
+            color: var(--text);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(255, 107, 0, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg);
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #F0F0F2;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            right: 24px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.warning {
+            background: var(--warning);
+            color: #333;
+        }
+
+        /* ── Pill badge ── */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pill-orange {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .pill-green {
+            background: #ECFDF5;
+            color: #065F46;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .field-group.span-2 {
+                grid-column: span 1;
+            }
+
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .badge-token {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-brand">
+                <div class="header-icon">🏠</div>
+                <div>
+                    <div class="header-title">Mi Cotización de Hipoteca</div>
+                    <div class="header-sub">Consulta y edita tu información</div>
+                </div>
+            </div>
+            <div class="badge-token" id="badge-token">Cargando...</div>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <div class="container" id="main-content">
+        <div class="spinner-wrap">
+            <div class="spinner"></div>
+            <p style="color: var(--text-light); font-size: 14px;">Cargando tu cotización...</p>
+        </div>
+    </div>
+
+    <!-- Save Bar (hidden until loaded) -->
+    <div class="save-bar" id="save-bar" style="display:none">
+        <div class="save-bar-info">
+            Puedes editar tu <strong>nombre, DPI y NIT</strong>. Los cálculos financieros no pueden modificarse.
+        </div>
+        <div style="display:flex;gap:10px">
+            <button class="btn btn-secondary" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir
+            </button>
+            <button class="btn btn-primary" id="btn-guardar-cambios" onclick="guardarCambios()">
+                <i class="fas fa-save"></i> Guardar cambios
+            </button>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="config.js"></script>
+    <script src="supabase-client.js"></script>
+    <script>
+        (function () {
+            const SC = window.SupabaseClient;
+            if (!SC) {
+                document.getElementById('main-content').innerHTML = '<div class="state-card"><span class="state-icon">⚠️</span><div class="state-title">Error de configuración</div><p class="state-desc">Falta config.js o supabase-client.js</p></div>';
+                return;
+            }
+
+            const esc = SC.escapeHtml;
+            const fmt = SC.fmt;
+            let cotizacionActual = null;
+
+            function getToken() {
+                return new URLSearchParams(window.location.search).get('token');
+            }
+
+            function showToast(msg, tipo = 'success') {
+                const t = document.getElementById('toast');
+                t.textContent = msg;
+                t.className = `toast ${tipo} show`;
+                setTimeout(() => t.classList.remove('show'), 3500);
+            }
+
+            async function cargarCotizacion() {
+                const token = getToken();
+                if (!token) { renderError('no-token'); return; }
+
+                document.getElementById('badge-token').textContent = token.substring(0, 18) + '...';
+
+                try {
+                    const tokenSeguro = encodeURIComponent(token);
+                    const data = await SC.supabaseFetch(
+                        `cotizaciones?edit_token=eq.${tokenSeguro}&select=*`
+                    );
+                    if (!data || data.length === 0) { renderError('not-found'); return; }
+                    cotizacionActual = data[0];
+                    renderCotizacion(cotizacionActual);
+                    document.getElementById('save-bar').style.display = 'flex';
+                } catch (err) {
+                    renderError('error', err.message);
+                }
+            }
+
+            function renderError(tipo, msg = '') {
+                const msgs = {
+                    'no-token': { icon: '🔑', title: 'Token requerido', desc: 'No se encontró un token en la URL. Usa el enlace que te compartieron.' },
+                    'not-found': { icon: '🔍', title: 'Cotización no encontrada', desc: 'El token no corresponde a ninguna cotización. Verifica que el enlace sea correcto.' },
+                    'error': { icon: '⚠️', title: 'Error al cargar', desc: msg || 'Ocurrió un error inesperado. Intenta de nuevo.' }
+                };
+                const m = msgs[tipo] || msgs['error'];
+                const container = document.getElementById('main-content');
+                container.innerHTML = '';
+                const card = document.createElement('div');
+                card.className = 'state-card';
+                const icon = document.createElement('span');
+                icon.className = 'state-icon';
+                icon.textContent = m.icon;
+                const title = document.createElement('div');
+                title.className = 'state-title';
+                title.textContent = m.title;
+                const desc = document.createElement('p');
+                desc.className = 'state-desc';
+                desc.textContent = m.desc;
+                card.appendChild(icon);
+                card.appendChild(title);
+                card.appendChild(desc);
+                container.appendChild(card);
+            }
+
+            function renderCotizacion(c) {
+                const simbolo = c.moneda === 'USD' ? '$' : 'Q';
+                const resumen = c.resumen_financiero || {};
+                const hipotecas = c.hipotecas_previas || [];
+                const otrosGastos = c.otros_gastos || [];
+                const desembolsos = c.desembolsos || [];
+
+                const fechaCreado = new Date(c.created_at).toLocaleDateString('es-GT', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+
+                let html = `
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle" style="margin-top:2px;flex-shrink:0"></i>
+              <div>Esta es tu cotización de hipoteca. Puedes editar tu <strong>nombre, DPI y NIT</strong>. Los datos financieros son de solo lectura.</div>
+            </div>
+
+            <div class="info-grid">
+              <div class="info-card">
+                <div class="info-card-label">Capital solicitado</div>
+                <div class="info-card-value highlight">${simbolo} ${fmt(c.capital)}</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-label">Empresa</div>
+                <div class="info-card-value">${esc(c.empresa) || '—'}</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-label">Tipo de préstamo</div>
+                <div class="info-card-value">${esc(c.tipo_prestamo) || '—'}</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-label">Fecha desembolso</div>
+                <div class="info-card-value">${esc(c.fecha_desembolso) || '—'}</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-label">Asesor</div>
+                <div class="info-card-value">${esc(c.asesor) || '—'}</div>
+              </div>
+              <div class="info-card">
+                <div class="info-card-label">Cotización creada</div>
+                <div class="info-card-value" style="font-size:14px">${fechaCreado}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <i class="fas fa-user"></i>
+                <h3>Tus datos <span class="pill pill-green"><i class="fas fa-pencil-alt" style="font-size:10px"></i> Editables</span></h3>
+              </div>
+              <div class="section-body">
+                <div class="alert alert-success" style="margin-bottom:16px">
+                  <i class="fas fa-check-circle" style="margin-top:2px;flex-shrink:0"></i>
+                  <div>Puedes actualizar tu nombre, DPI y NIT. Los demás campos son informativos.</div>
+                </div>
+                <div class="form-grid">
+                  <div class="field-group span-2">
+                    <label class="field-label">Nombre completo</label>
+                    <input type="text" id="edit-cliente" class="field-input editable" value="${esc(c.cliente)}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">DPI</label>
+                    <input type="text" id="edit-dpi" class="field-input editable" value="${esc(c.dpi)}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">NIT</label>
+                    <input type="text" id="edit-nit" class="field-input editable" value="${esc(c.nit)}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Tipo de solicitud</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.tipo_solicitud)}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Moneda</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.moneda)}">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-header">
+                <i class="fas fa-percentage"></i>
+                <h3>Condiciones financieras <span class="pill pill-orange"><i class="fas fa-lock" style="font-size:10px"></i> Solo lectura</span></h3>
+              </div>
+              <div class="section-body">
+                <div class="form-grid">
+                  <div class="field-group">
+                    <label class="field-label">Capital solicitado</label>
+                    <input type="text" class="field-input" readonly value="${simbolo} ${fmt(c.capital)}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">% Interés mensual</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.interes)}%">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">% Corretaje</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.corretaje)}%">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">% Gastos admin.</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.gastos_admin)}%">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">% Legal</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.legal)}%">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Meses adelantados</label>
+                    <input type="text" class="field-input" readonly value="${c.meses_adelantar || 0}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Cantidad de fincas</label>
+                    <input type="text" class="field-input" readonly value="${c.cantidad_fincas || 0}">
+                  </div>
+                  <div class="field-group">
+                    <label class="field-label">Tipo de impuesto</label>
+                    <input type="text" class="field-input" readonly value="${esc(c.tipo_impuesto)}">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            ${resumen && Object.keys(resumen).length > 0 ? `
+            <div class="section">
+              <div class="section-header">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Desglose financiero</h3>
+              </div>
+              <div class="section-body">
+                <table class="desglose-table">
+                  <tr>
+                    <td class="label">Monto solicitado</td>
+                    <td class="amount">${esc(resumen['desglose-monto']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Intereses del mes en curso</td>
+                    <td class="amount negative">${esc(resumen['desglose-intereses-mes']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Intereses adelantados</td>
+                    <td class="amount negative">${esc(resumen['desglose-intereses-adelantados']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Corretaje</td>
+                    <td class="amount negative">${esc(resumen['desglose-corretaje']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Gastos administrativos</td>
+                    <td class="amount negative">${esc(resumen['desglose-gastos-admin']) || '—'}</td>
+                  </tr>
+                  <tr class="subtotal-row">
+                    <td class="label">Subtotal</td>
+                    <td class="amount">${esc(resumen['desglose-subtotal']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Honorarios escrituración</td>
+                    <td class="amount negative">${esc(resumen['desglose-honorarios']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Timbre notarial</td>
+                    <td class="amount negative">${esc(resumen['desglose-timbre']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Registro</td>
+                    <td class="amount negative">${esc(resumen['desglose-registro']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="indent">(-) Timbres fiscales</td>
+                    <td class="amount negative">${esc(resumen['desglose-timbres']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Gastos legales</td>
+                    <td class="amount negative">${esc(resumen['desglose-otros-gastos-legales']) || '—'}</td>
+                  </tr>
+                  <tr>
+                    <td class="label">Otros gastos</td>
+                    <td class="amount negative">${esc(resumen['desglose-otros-gastos']) || '—'}</td>
+                  </tr>
+                  <tr class="subtotal-row">
+                    <td class="label">Total gastos</td>
+                    <td class="amount negative">${esc(resumen['desglose-total-gastos']) || '—'}</td>
+                  </tr>
+                  <tr class="total-row">
+                    <td class="label" style="font-weight:700;color:var(--primary-dark)">🏠 Recibe de la hipoteca</td>
+                    <td class="amount positive">${esc(resumen['desglose-total-recibe']) || '—'}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            ` : ''}
+
+            ${hipotecas.length > 0 ? `
+            <div class="section">
+              <div class="section-header">
+                <i class="fas fa-exchange-alt"></i>
+                <h3>Traslado de hipotecas</h3>
+              </div>
+              <div class="section-body">
+                ${hipotecas.map((h, i) => `
+                  <div style="background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px">
+                    <div style="font-weight:600;color:var(--primary);margin-bottom:12px">Hipoteca ${i + 1}</div>
+                    <div class="form-grid">
+                      <div class="field-group">
+                        <label class="field-label">Monto</label>
+                        <input type="text" class="field-input" readonly value="${simbolo} ${fmt(h.monto)}">
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label">Acreedor</label>
+                        <input type="text" class="field-input" readonly value="${esc(h.acreedor) || '—'}">
+                      </div>
+                      <div class="field-group">
+                        <label class="field-label">Monto CTP</label>
+                        <input type="text" class="field-input" readonly value="${simbolo} ${fmt(h.monto_ctp)}">
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+
+            ${desembolsos.length > 0 ? `
+            <div class="section">
+              <div class="section-header">
+                <i class="fas fa-money-bill-wave"></i>
+                <h3>Detalle de desembolsos</h3>
+              </div>
+              <div class="section-body">
+                <div class="table-scroll">
+                  <table class="desembolsos-table">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Beneficiario</th>
+                        <th>Monto</th>
+                        <th>Concepto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${desembolsos.map(d => `
+                        <tr>
+                          <td>${esc(d.tipo) || '—'}</td>
+                          <td>${esc(d.beneficiario) || '—'}</td>
+                          <td style="font-family:'DM Mono',monospace">${simbolo} ${fmt(d.monto)}</td>
+                          <td>${esc(d.concepto) || '—'}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            ` : ''}
+          `;
+
+                document.getElementById('main-content').innerHTML = html;
+            }
+
+            async function guardarCambios() {
+                if (!cotizacionActual) return;
+
+                const token = getToken();
+                const btn = document.getElementById('btn-guardar-cambios');
+
+                const cliente = document.getElementById('edit-cliente')?.value?.trim();
+                const dpi = document.getElementById('edit-dpi')?.value?.trim();
+                const nit = document.getElementById('edit-nit')?.value?.trim();
+
+                if (!cliente) { showToast('⚠️ El nombre no puede estar vacío', 'warning'); return; }
+
+                btn.disabled = true;
+                btn.innerHTML = '<span class="sb-spinner" style="width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:white;border-radius:50%;display:inline-block;animation:spin 0.7s linear infinite"></span> Guardando...';
+
+                try {
+                    const tokenSeguro = encodeURIComponent(token);
+                    await SC.supabaseFetch(
+                        `cotizaciones?edit_token=eq.${tokenSeguro}`,
+                        'PATCH',
+                        { cliente, dpi, nit },
+                        { 'Prefer': 'return=minimal' }
+                    );
+                    cotizacionActual.cliente = cliente;
+                    cotizacionActual.dpi = dpi;
+                    cotizacionActual.nit = nit;
+                    showToast('✅ Cambios guardados correctamente', 'success');
+                } catch (err) {
+                    showToast('❌ Error al guardar: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-save"></i> Guardar cambios';
+                }
+            }
+
+            window.guardarCambios = guardarCambios;
+
+            cargarCotizacion();
+        })();
+    </script>
+
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media print {
+
+            .save-bar,
+            .header {
+                display: none !important;
+            }
+
+            .container {
+                padding: 0;
+            }
+        }
+    </style>
+
+</body>
+
+</html>

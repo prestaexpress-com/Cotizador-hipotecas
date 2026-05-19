@@ -1,0 +1,4 @@
+window.APP_CONFIG = {
+  SUPABASE_URL: 'https://YOUR_PROJECT_REF.supabase.co',
+  SUPABASE_KEY: 'YOUR_PUBLISHABLE_KEY_HERE'
+};
