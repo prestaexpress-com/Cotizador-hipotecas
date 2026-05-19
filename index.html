@@ -4236,6 +4236,10 @@
                 const legal = document.getElementById('print-legal')?.textContent || '';
                 const asesor = document.getElementById('print-asesor')?.textContent || '';
 
+                const correlativo = (typeof window.obtenerCorrelativoActual === 'function')
+                    ? window.obtenerCorrelativoActual()
+                    : '';
+
                 // Obtener la fecha de desembolso del formulario
                 const fechaDesembolsoInput = document.getElementById('fecha-formulario');
                 let fechaDesembolso = 'No especificada';
@@ -4373,6 +4377,18 @@
                     font-weight: 600;
                     text-align: center;
                     margin-top: 3px;
+                }
+                
+                .document-correlativo {
+                    color: var(--gray-light);
+                    font-size: 7.5pt;
+                    font-weight: 500;
+                    font-family: 'Courier New', monospace;
+                    text-align: center;
+                    margin-top: 4px;
+                    letter-spacing: 1px;
+                    border-top: 1px dashed var(--border);
+                    padding-top: 4px;
                 }
                 
                 /* Estilo de contenido */
@@ -4718,6 +4734,7 @@ td {
                             <div class="document-title">PROPUESTA DE HIPOTECA</div>
                             <div class="document-date">${fechaFormateada}</div>
                             <div class="document-desembolso-date">Fecha Desembolso: ${fechaDesembolso}</div>
+                            ${correlativo ? `<div class="document-correlativo">${correlativo}</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -4838,6 +4855,7 @@ td {
                         <div class="document-badge">
                             <div class="document-title">PROPUESTA DE HIPOTECA</div>
                             <div class="document-date">${fechaFormateada}</div>
+                            ${correlativo ? `<div class="document-correlativo">${correlativo}</div>` : ''}
                         </div>
                     </div>
                 </div>
