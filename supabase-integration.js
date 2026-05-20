@@ -12,7 +12,7 @@
 
   function formatearCorrelativo(numero) {
     if (numero === null || numero === undefined) return '';
-    return 'CCQ-' + String(numero).padStart(4, '0');
+    return 'CH-' + String(numero).padStart(4, '0');
   }
 
   window.obtenerCorrelativoActual = function () {
@@ -103,19 +103,15 @@
     };
   }
 
-  async function guardarCotizacion() {
-    const btn = document.getElementById('btn-guardar-supabase');
+  async function guardarOActualizar() {
     const datos = recolectarDatos();
 
     if (!datos.cliente || !datos.capital) {
-      mostrarToast('⚠️ Primero calcula la cotización antes de guardar.', 'warning');
-      return;
+      mostrarToast('⚠️ Primero calcula la cotización antes de generar el PDF.', 'warning');
+      return null;
     }
 
-    btn.disabled = true;
-
     if (modoEdicion && tokenActivo) {
-      btn.innerHTML = '<span class="sb-spinner"></span> Actualizando...';
       try {
         const etiquetas = {
           cliente: 'Cliente', dpi: 'DPI', nit: 'NIT', empresa: 'Empresa',
@@ -145,40 +141,49 @@
         };
 
         const tokenSeguro = encodeURIComponent(tokenActivo);
-        await SC.supabaseFetch(
+        const resultado = await SC.supabaseFetch(
           `cotizaciones?edit_token=eq.${tokenSeguro}`,
           'PATCH',
           payload
         );
 
-        mostrarToast('✅ Cotización actualizada correctamente', 'success');
-        salirModoEdicion();
+        mostrarToast('✅ Cotización actualizada', 'success');
+        const registro = Array.isArray(resultado) ? resultado[0] : resultado;
+        return {
+          token: tokenActivo,
+          numero: registro?.numero ?? correlativoActual,
+          esEdicion: true
+        };
       } catch (err) {
         console.error(err);
         mostrarToast('❌ Error al actualizar: ' + err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-save mr-1"></i> Actualizar';
+        return null;
       }
-      return;
     }
 
-    btn.innerHTML = '<span class="sb-spinner"></span> Guardando...';
     try {
       const resultado = await SC.supabaseFetch('cotizaciones', 'POST', datos);
       const registro = Array.isArray(resultado) ? resultado[0] : resultado;
       const token = registro.edit_token;
       correlativoActual = registro.numero;
       localStorage.setItem('ultimo_token', token);
-      mostrarModalToken(token, datos.cliente, correlativoActual);
+      mostrarToast('✅ Cotización guardada (' + formatearCorrelativo(correlativoActual) + ')', 'success');
+      return {
+        token: token,
+        numero: registro.numero,
+        esEdicion: false
+      };
     } catch (err) {
       console.error(err);
       mostrarToast('❌ Error al guardar: ' + err.message, 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Guardar';
+      return null;
     }
   }
+
+  window.guardarParaPDF = guardarOActualizar;
+  window.obtenerTokenActual = function () {
+    return tokenActivo;
+  };
 
   async function cargarPorToken() {
     const input = document.getElementById('sb-token-input');
@@ -386,12 +391,6 @@
       banner.style.display = 'flex';
       document.getElementById('sb-edicion-nombre').textContent = nombreCliente || 'cliente';
     }
-    const btnGuardar = document.getElementById('btn-guardar-supabase');
-    if (btnGuardar) {
-      btnGuardar.innerHTML = '<i class="fas fa-save mr-1"></i> Actualizar';
-      btnGuardar.style.background = 'linear-gradient(135deg, #3B82F6, #1D4ED8)';
-      btnGuardar.style.boxShadow = '0 2px 8px rgba(59,130,246,0.35)';
-    }
     const input = document.getElementById('sb-token-input');
     if (input) input.value = '';
   }
@@ -403,12 +402,6 @@
     correlativoActual = null;
     const banner = document.getElementById('sb-edicion-banner');
     if (banner) banner.style.display = 'none';
-    const btnGuardar = document.getElementById('btn-guardar-supabase');
-    if (btnGuardar) {
-      btnGuardar.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Guardar';
-      btnGuardar.style.background = 'linear-gradient(135deg, #00B884, #009970)';
-      btnGuardar.style.boxShadow = '0 2px 8px rgba(0,184,132,0.3)';
-    }
   }
 
   function mostrarModalToken(token, cliente, numero) {
@@ -474,16 +467,6 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    const btnPDF = document.getElementById('save-pdf-btn');
-    if (btnPDF) {
-      const btnGuardar = document.createElement('button');
-      btnGuardar.id = 'btn-guardar-supabase';
-      btnGuardar.innerHTML = '<i class="fas fa-cloud-upload-alt mr-1"></i> Guardar';
-      btnGuardar.className = 'sb-guardar-btn';
-      btnGuardar.addEventListener('click', guardarCotizacion);
-      btnPDF.parentNode.insertBefore(btnGuardar, btnPDF);
-    }
-
     const tokenWrap = document.createElement('div');
     tokenWrap.id = 'sb-token-wrap';
     tokenWrap.innerHTML = `
@@ -535,25 +518,6 @@
 
     const style = document.createElement('style');
     style.textContent = `
-      .sb-guardar-btn {
-        background: linear-gradient(135deg, #00B884, #009970);
-        color: white;
-        border: none;
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-right: 8px;
-        box-shadow: 0 2px 8px rgba(0,184,132,0.3);
-        transition: all 0.2s;
-      }
-      .sb-guardar-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,184,132,0.4); }
-      .sb-guardar-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-
       .sb-spinner {
         width: 14px; height: 14px;
         border: 2px solid rgba(255,255,255,0.4);
