@@ -1117,6 +1117,8 @@
                             <select id="empresa" class="input-field w-full">
                                 <option value=""></option>
                                 <option value="Coopexpress">Coopexpress</option>
+                                <option value="Hollem">Hollem</option>
+                                <option value="Calem">Calem</option>
                             </select>
                         </div>
 
@@ -2056,7 +2058,7 @@
                     <p class="text-sm"></p>
                 </div>
                 <div>
-                    <p class="text-sm">Versión 2.0 | Desarrollado por IT</p>
+                    <p class="text-sm">Versión 1.0 | Desarrollado por Departamento de Sistemas</p>
                 </div>
             </div>
         </div>
@@ -2608,7 +2610,7 @@
                 const printEmpresa = document.getElementById('print-empresa');
                 const headerEmpresa = document.getElementById('header-empresa');
 
-                if (empresa === 'Coopexpress') {
+                if (empresa) {
                     printEmpresa.textContent = empresa.toUpperCase();
                     headerEmpresa.textContent = empresa.toUpperCase();
                 } else {
@@ -3589,7 +3591,7 @@
 
 
 
-            if (empresa === 'Coopexpress') {
+            if (empresa) {
                 document.getElementById('print-empresa').textContent = empresa;
             } else {
                 document.getElementById('print-empresa').textContent = '';
@@ -3831,12 +3833,11 @@
 
                         // Aplicamos las reglas especiales si es cualquier tipo de Compraventa
                         if (tipoDesembolso.startsWith('Compraventa')) {
-                            if (empresaSeleccionada === 'Hollem, S.A.' || empresaSeleccionada === 'Coopexpress') {
+                            if (empresaSeleccionada === 'Hollem, S.A.' || empresaSeleccionada === 'Hollem' || empresaSeleccionada === 'Coopexpress') {
                                 empresaDesembolso = 'Coserfi';
-                            } else if (empresaSeleccionada === 'Corporación Calem, S.A.') {
+                            } else if (empresaSeleccionada === 'Corporación Calem, S.A.' || empresaSeleccionada === 'Calem') {
                                 empresaDesembolso = 'Tecnolease';
                             }
-                            // Si no coincide con ninguna, conserva empresaSeleccionada
                         }
 
                         const newRow = document.createElement('tr');
