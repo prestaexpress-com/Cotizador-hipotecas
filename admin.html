@@ -1096,7 +1096,7 @@
   <div id="login-screen" style="display:none">
     <div class="login-card">
       <div class="login-logo">🏠</div>
-      <div class="login-title">Panel de ingreso</div>
+      <div class="login-title">Acceso al sistema</div>
       <div class="login-sub">Verifica tu identidad para continuar</div>
 
       <div class="form-field">
@@ -1229,6 +1229,8 @@
             <select class="filter-select" id="filter-empresa" onchange="filtrarTabla()">
               <option value="">Todas las empresas</option>
               <option value="Coopexpress">Coopexpress</option>
+              <option value="Hollem">Hollem</option>
+              <option value="Calem">Calem</option>
             </select>
 
             <select class="filter-select" id="filter-mes" onchange="filtrarTabla()">
@@ -1503,7 +1505,7 @@
 
         cotizacionesFiltradas = todasCotizaciones.filter(c => {
           const correlativoTxt = c.numero !== null && c.numero !== undefined
-            ? ('ccq-' + String(c.numero).padStart(4, '0'))
+            ? ('ch-' + String(c.numero).padStart(4, '0'))
             : '';
           const matchQ = !q ||
             (c.cliente || '').toLowerCase().includes(q) ||
@@ -1542,7 +1544,7 @@
 
       function fmtCorrelativo(numero) {
         if (numero === null || numero === undefined) return '—';
-        return 'CCQ-' + String(numero).padStart(4, '0');
+        return 'CH-' + String(numero).padStart(4, '0');
       }
 
       function renderTabla(data) {
