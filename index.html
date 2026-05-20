@@ -4233,13 +4233,26 @@
                             return;
                         }
 
-                        const contenidoHTML = generarContenidoHTML();
+                        const clienteName = (document.getElementById('print-cliente')?.textContent || 'Cliente').trim();
+                        const correlativoTmp = (typeof window.obtenerCorrelativoActual === 'function')
+                            ? window.obtenerCorrelativoActual()
+                            : '';
+                        const tituloVentana = correlativoTmp
+                            ? `${correlativoTmp} - ${clienteName}`
+                            : `Propuesta de Hipoteca - ${clienteName}`;
+
+                        try { printWindow.document.title = tituloVentana; } catch (e) {}
+
+                        const contenidoHTML = generarContenidoHTML(tituloVentana);
 
                         printWindow.document.open();
                         printWindow.document.write(contenidoHTML);
                         printWindow.document.close();
 
+                        try { printWindow.document.title = tituloVentana; } catch (e) {}
+
                         printWindow.onload = function () {
+                            try { printWindow.document.title = tituloVentana; } catch (e) {}
                             document.body.removeChild(overlay);
 
                             setTimeout(function () {
@@ -4254,7 +4267,7 @@
                 }, 500);
             }
 
-            function generarContenidoHTML() {
+            function generarContenidoHTML(tituloPersonalizado) {
                 const empresa = document.getElementById('print-empresa')?.textContent || '';
                 const cliente = document.getElementById('print-cliente')?.textContent || '';
                 const dpi = document.getElementById('print-dpi')?.textContent || '';
@@ -4296,11 +4309,14 @@
                 const diferenciaTotal = diferenciaElement ? diferenciaElement.textContent : '0.00';
                 const diferenciaClass = diferenciaElement && diferenciaElement.classList.contains('text-green-600') ? 'positive' : 'negative';
 
+                const tituloLimpio = (tituloPersonalizado || ('Propuesta de Hipoteca - ' + empresa))
+                    .replace(/[<>&"']/g, '');
+
                 return `
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Propuesta de Hipoteca - ${empresa}</title>
+            <title>${tituloLimpio}</title>
             <meta charset="UTF-8">
             <style>
                 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
