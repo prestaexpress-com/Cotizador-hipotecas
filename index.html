@@ -2717,10 +2717,7 @@
 
 
 
-            document.getElementById('save-pdf-btn').addEventListener('click', (e) => {
-                e.preventDefault();
-                generarPDF();
-            });
+
 
             // Event listener para la fecha de desembolso
             document.getElementById('fecha-formulario').addEventListener('change', function () {
@@ -4171,12 +4168,47 @@
                     const newButton = pdfButton.cloneNode(true);
                     pdfButton.parentNode.replaceChild(newButton, pdfButton);
 
-                    newButton.addEventListener('click', function (e) {
+                    newButton.addEventListener('click', async function (e) {
                         e.preventDefault();
                         e.stopPropagation();
-                        generarPDF();
+                        await guardarYGenerarPDF(newButton);
                         return false;
                     });
+                }
+            }
+
+            async function guardarYGenerarPDF(boton) {
+                const textoOriginal = boton.innerHTML;
+                boton.disabled = true;
+                boton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
+
+                let resultado = null;
+                try {
+                    if (typeof window.guardarParaPDF === 'function') {
+                        resultado = await window.guardarParaPDF();
+                        if (!resultado) {
+                            boton.disabled = false;
+                            boton.innerHTML = textoOriginal;
+                            return;
+                        }
+                        window.__tokenParaPDF = resultado.token;
+                    } else {
+                        window.__tokenParaPDF = null;
+                    }
+                } catch (err) {
+                    console.error('Error al guardar antes de PDF:', err);
+                    window.__tokenParaPDF = null;
+                }
+
+                boton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Generando PDF...';
+
+                try {
+                    generarPDF();
+                } finally {
+                    setTimeout(() => {
+                        boton.disabled = false;
+                        boton.innerHTML = textoOriginal;
+                    }, 800);
                 }
             }
 
@@ -4239,6 +4271,8 @@
                 const correlativo = (typeof window.obtenerCorrelativoActual === 'function')
                     ? window.obtenerCorrelativoActual()
                     : '';
+
+                const tokenPDF = (window.__tokenParaPDF || '').replace(/[<>&"']/g, '');
 
                 // Obtener la fecha de desembolso del formulario
                 const fechaDesembolsoInput = document.getElementById('fecha-formulario');
@@ -4389,6 +4423,31 @@
                     letter-spacing: 1px;
                     border-top: 1px dashed var(--border);
                     padding-top: 4px;
+                }
+
+                .token-footer {
+                    position: absolute;
+                    bottom: 12px;
+                    left: 18px;
+                    font-family: 'Courier New', monospace;
+                    font-size: 6.5pt;
+                    color: #b8b8b8;
+                    letter-spacing: 0.3px;
+                    line-height: 1.3;
+                    user-select: all;
+                    z-index: 10;
+                    max-width: 60%;
+                    word-break: break-all;
+                }
+
+                .token-footer-label {
+                    color: #d0d0d0;
+                    font-size: 6pt;
+                    text-transform: uppercase;
+                    letter-spacing: 0.8px;
+                    margin-bottom: 1px;
+                    font-family: 'Inter', sans-serif;
+                    font-weight: 500;
                 }
                 
                 /* Estilo de contenido */
@@ -4866,7 +4925,12 @@ td {
                     ${detalleGastos}
                 </div>
                 
-                
+                ${tokenPDF ? `
+                <div class="token-footer">
+                    <div class="token-footer-label">Token de cliente</div>
+                    ${tokenPDF}
+                </div>
+                ` : ''}
               
             </div>
             
