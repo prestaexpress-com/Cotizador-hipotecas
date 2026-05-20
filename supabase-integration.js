@@ -256,8 +256,9 @@
 
     const headerEmpresa = document.getElementById('header-empresa');
     const printEmpresa = document.getElementById('print-empresa');
-    if (headerEmpresa) headerEmpresa.textContent = c.empresa === 'Coopexpress' ? 'COOPEXPRESS' : '';
-    if (printEmpresa) printEmpresa.textContent = c.empresa === 'Coopexpress' ? 'COOPEXPRESS' : '';
+    const nombreEmpresa = c.empresa ? c.empresa.toUpperCase() : '';
+    if (headerEmpresa) headerEmpresa.textContent = nombreEmpresa;
+    if (printEmpresa) printEmpresa.textContent = nombreEmpresa;
 
     const asesorSel = document.getElementById('asesor');
     if (asesorSel && c.asesor) {
